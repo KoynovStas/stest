@@ -264,6 +264,40 @@ static void print_total(size_t count_pass, size_t count_skip, size_t count_fail)
 
 
 
+static int run_case(struct test_case_t *test_case)
+{
+    struct test_info_t test_info;
+    size_t i;
+
+
+    print_header(test_case->case_name);
+
+
+    for(i = 0; i < test_case->count_tests; ++i)
+    {
+        if( test_case->init )
+            test_case->init(test_case);
+
+
+        test_info = test_case->tests[i](test_case->data); //run test
+
+
+        if( test_case->clean )
+            test_case->clean(test_case);
+
+
+        print_status(test_case, &test_info);
+    }
+
+
+    print_total(test_case->count_pass, test_case->count_skip, test_case->count_fail);
+    print_footer(test_case->case_name);
+
+    return test_case->count_fail;
+}
+
+
+
 
 
 #endif //STEST_HEADER
