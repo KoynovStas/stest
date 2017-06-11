@@ -320,6 +320,16 @@ static inline int run_cases(struct test_case_t *test_cases[], size_t count_cases
 
 
 
+#define MAIN_TESTS(tests)                                 \
+    int main(void) {                                      \
+        struct test_case_t test_case = {                  \
+        NULL, NULL, 0, SIZE_OF_ARRAY(tests), tests, NULL};\
+                                                          \
+        return run_case(&test_case);                      \
+    }
+
+
+
 
 
 #endif //STEST_HEADER
