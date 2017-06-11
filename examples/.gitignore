@@ -1,0 +1,42 @@
+# Object files
+*.o
+*.o.*
+*.ko
+*.obj
+*.elf
+
+
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+
+
+# Shared objects
+*.so
+*.so.*
+
+
+
+# Binary files
+*.exe
+one_test
+one_case
+many_tests
+many_cases
+
+
+
+# Temp files
+*.*~
+*.pid
+*.log
+*.depend
+
+
+
+# Files that we don't want to ignore
+!.gitignore
