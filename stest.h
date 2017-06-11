@@ -161,6 +161,18 @@ static void print_header(const char *title)
 
 
 
+static void print_footer(const char *title)
+{
+    printf("========== Finished testing");
+
+    if(title)
+        printf(" of %s", title);
+
+    printf(" ==========\n");
+}
+
+
+
 
 
 #endif //STEST_HEADER
