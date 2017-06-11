@@ -73,6 +73,7 @@ struct test_info_t
 
 
 #define TEST_PASS(msg)  return (struct test_info_t) {__FILE__, __func__, __LINE__, STATUS_PASS, msg}
+#define TEST_SKIP(msg)  return (struct test_info_t) {__FILE__, __func__, __LINE__, STATUS_SKIP, msg}
 
 
 
