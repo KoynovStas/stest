@@ -43,4 +43,18 @@
 #define STEST_HEADER
 
 
+
+
+
+enum test_status_t
+{
+    STATUS_PASS,
+    STATUS_SKIP,
+    STATUS_FAIL
+};
+
+
+
+
+
 #endif //STEST_HEADER
