@@ -68,6 +68,10 @@ struct test_info_t
 
 
 
+#define TEST(name) struct test_info_t name(void *data)
+
+
+
 
 
 #endif //STEST_HEADER
