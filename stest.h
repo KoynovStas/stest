@@ -298,6 +298,28 @@ static int run_case(struct test_case_t *test_case)
 
 
 
+static inline int run_cases(struct test_case_t *test_cases[], size_t count_cases)
+{
+    size_t i;
+    size_t count_pass = 0, count_skip = 0, count_fail = 0;
+
+
+    for(i = 0; i < count_cases; ++i)
+    {
+       count_fail += run_case(test_cases[i]);
+
+       count_pass += test_cases[i]->count_pass;
+       count_skip += test_cases[i]->count_skip;
+    }
+
+    print_total(count_pass, count_skip, count_fail);
+    print_footer(NULL);
+
+    return count_fail;
+}
+
+
+
 
 
 #endif //STEST_HEADER
