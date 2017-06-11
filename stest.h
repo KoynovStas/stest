@@ -72,6 +72,10 @@ struct test_info_t
 
 
 
+#define TEST_PASS(msg)  return (struct test_info_t) {__FILE__, __func__, __LINE__, STATUS_PASS, msg}
+
+
+
 
 
 #endif //STEST_HEADER
