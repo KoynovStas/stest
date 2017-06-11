@@ -329,6 +329,9 @@ static inline int run_cases(struct test_case_t *test_cases[], size_t count_cases
     }
 
 
+#define MAIN_CASE(test_case) int main(void) { return run_case(&test_case); }
+
+
 
 
 
