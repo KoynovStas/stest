@@ -55,6 +55,19 @@ enum test_status_t
 
 
 
+struct test_info_t
+{
+    const char *file_name;
+    const char *func_name;
+    int         line_num;
+
+    int         status;
+
+    const char *msg;
+};
+
+
+
 
 
 #endif //STEST_HEADER
