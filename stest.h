@@ -138,6 +138,17 @@ struct test_case_t
 
 
 
+#define  SIZE_OF_ARRAY(array) (sizeof(array) / sizeof(array[0]))
+
+
+#define TEST_CASE(_name, _tests, _data, _init, _clean) \
+    struct test_case_t _name = {                       \
+    __FILE__, #_name, __LINE__,                        \
+    SIZE_OF_ARRAY(_tests), _tests,                     \
+   _data, _init, _clean, 0, 0, 0 };
+
+
+
 
 
 #endif //STEST_HEADER
