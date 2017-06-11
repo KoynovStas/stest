@@ -71,7 +71,7 @@ struct test_info_t
 
 
 
-#define TEST(name) struct test_info_t name(void *data)
+#define TEST(name) static struct test_info_t name(void *data)
 
 
 
