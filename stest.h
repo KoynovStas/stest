@@ -78,4 +78,10 @@ struct test_info_t
 
 
 
+#define TEST_ASSERT2(expr, msg)  if( !(expr) ) TEST_FAIL(msg)
+
+
+
+
+
 #endif //STEST_HEADER
