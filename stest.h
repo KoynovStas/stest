@@ -212,5 +212,33 @@ static void print_footer(const char *title)
 
 
 
+static void print_status(struct test_case_t *test_case, struct test_info_t *test_info)
+{
+    switch (test_info->status)
+    {
+        case STATUS_PASS:
+            printf(COLOR_TEXT_PASS "  %s", test_info->func_name);
+            test_case->count_pass++;
+            break;
+
+        case STATUS_SKIP:
+            printf(COLOR_TEXT_SKIP "  %s", test_info->func_name);
+            test_case->count_skip++;
+            break;
+
+        default:
+            printf(COLOR_TEXT_FAIL "  %s  in file: %s:%d", test_info->func_name, test_info->file_name, test_info->line_num);
+            test_case->count_fail++;
+            break;
+    }
+
+
+    if(test_info->msg)
+        printf("  msg:  %s", test_info->msg);
+}
+
+
+
+
 
 #endif //STEST_HEADER
