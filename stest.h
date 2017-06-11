@@ -82,6 +82,28 @@ struct test_info_t
 #define TEST_ASSERT(expr)  TEST_ASSERT2(expr, NULL)
 
 
+/*
+ * For GCC 4.6 or higher, in C++ you can use a standard right static_assert(exp, msg)
+ * in *.c and in *.h files.
+ * For GCC 4.6 is required to add CFLAGS += -std="c++0x"
+ * Simple C (gcc) have not static_assert.
+ * A lot of variants, it is the most simple and intuitive
+ * It can be used in *.c and in *.h files.
+ * (macros that use function style can be used in *.c files only)
+ *
+ * Disadvantages: you can not be set msg to display the console when compiling
+ *
+ * Example:
+ *
+ * TEST_STATIC_ASSERT( sizeof(char) == 1)  //good job
+ * TEST_STATIC_ASSERT( sizeof(char) != 1)  //You will get a compilation error
+*/
+#define TEST_ASSERT_CONCAT_(a, b) a##b
+#define TEST_ASSERT_CONCAT(a, b) TEST_ASSERT_CONCAT_(a, b)
+#define TEST_STATIC_ASSERT(expr) \
+    enum { TEST_ASSERT_CONCAT(assert_line_, __LINE__) = 1/(int)(!!(expr)) }
+
+
 
 
 
