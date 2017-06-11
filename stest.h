@@ -149,6 +149,18 @@ struct test_case_t
 
 
 
+static void print_header(const char *title)
+{
+    printf("\n\n---------- Start testing");
+
+    if(title)
+        printf(" of %s", title);
+
+    printf(" ----------");
+}
+
+
+
 
 
 #endif //STEST_HEADER
