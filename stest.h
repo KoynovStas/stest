@@ -105,6 +105,39 @@ struct test_info_t
 
 
 
+typedef  struct test_info_t (*ptest_func)(void *data);
+
+
+struct test_case_t;
+
+typedef  void  (*pinit_func)(struct test_case_t *test_case);
+typedef  void  (*pclean_func)(struct test_case_t *test_case);
+
+
+
+struct test_case_t
+{
+    const char *file_name;
+    const char *case_name;
+    int         line_num;
+    size_t      count_tests;
+
+    ptest_func *tests;
+
+    void       *data;
+
+    pinit_func  init;
+    pclean_func clean;
+
+
+    //private
+    size_t count_pass;
+    size_t count_skip;
+    size_t count_fail;
+};
+
+
+
 
 
 #endif //STEST_HEADER
