@@ -239,6 +239,31 @@ static void print_status(struct test_case_t *test_case, struct test_info_t *test
 
 
 
+static void print_total(size_t count_pass, size_t count_skip, size_t count_fail)
+{
+    printf("\n\nTotals:");
+
+
+    if(count_pass)
+        printf(" %zu " COLOR_TEXT_PASSED, count_pass);
+    else
+        printf(" %zu " TEXT_PASSED, count_pass);
+
+
+    if(count_skip)
+        printf(", %zu " COLOR_TEXT_SKIPED, count_skip);
+    else
+        printf(", %zu " TEXT_SKIPED, count_skip);
+
+
+    if(count_fail)
+        printf(", %zu " COLOR_TEXT_FAILED, count_fail);
+    else
+        printf(", %zu " TEXT_FAILED, count_fail);
+}
+
+
+
 
 
 #endif //STEST_HEADER
