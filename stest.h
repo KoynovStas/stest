@@ -79,6 +79,7 @@ struct test_info_t
 
 
 #define TEST_ASSERT2(expr, msg)  if( !(expr) ) TEST_FAIL(msg)
+#define TEST_ASSERT(expr)  TEST_ASSERT2(expr, NULL)
 
 
 
