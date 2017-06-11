@@ -8,7 +8,8 @@ GCC       = gcc
 
 # list of tests for build
 TESTS  = one_test    \
-         many_tests
+         many_tests  \
+		 one_case
 
 
 
