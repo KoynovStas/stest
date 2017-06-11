@@ -315,26 +315,25 @@ static inline int run_cases(struct test_case_t *test_cases[], size_t count_cases
        count_skip += test_cases[i]->count_skip;
     }
 
-    print_total(count_pass, count_skip, count_fail);
-    print_footer(NULL);
+    if( count_cases > 1 )
+    {
+        print_total(count_pass, count_skip, count_fail);
+        print_footer(NULL);
+    }
 
     return count_fail;
 }
 
 
 
-#define MAIN_TESTS(tests)                                 \
-    int main(void) {                                      \
-        struct test_case_t test_case = {                  \
-        NULL, NULL, 0, SIZE_OF_ARRAY(tests), tests, NULL};\
-                                                          \
-        return run_case(&test_case);                      \
-    }
-
-
 #define MAIN_CASE(test_case) int main(void) { return run_case(&test_case); }
 
 #define MAIN_CASES(test_cases) int main(void) { return run_cases(test_cases, SIZE_OF_ARRAY(test_cases)); }
+
+#define MAIN_TESTS(tests)                             \
+    struct test_case_t test_case = {                  \
+    NULL, NULL, 0, SIZE_OF_ARRAY(tests), tests, NULL};\
+    MAIN_CASE(test_case)
 
 
 
