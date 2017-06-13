@@ -5,7 +5,7 @@
 
 TEST(test_1)
 {
-    TEST_PASS();
+    TEST_PASS(NULL);
 }
 
 

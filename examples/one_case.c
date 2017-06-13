@@ -5,7 +5,7 @@
 
 TEST(test_pass)
 {
-    TEST_PASS();
+    TEST_PASS(NULL);
 }
 
 
@@ -19,7 +19,7 @@ TEST(test_pass2)
 
 TEST(test_skip)
 {
-    TEST_SKIP();
+    TEST_SKIP(NULL);
 }
 
 
@@ -33,7 +33,7 @@ TEST(test_skip2)
 
 TEST(test_fail)
 {
-    TEST_FAIL();
+    TEST_FAIL(NULL);
 }
 
 
