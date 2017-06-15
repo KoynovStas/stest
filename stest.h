@@ -193,7 +193,7 @@ static void print_footer(const char *title)
 
 #define TEXT_PASSED "passed"
 #define TEXT_SKIPED "skipped"
-#define TEXT_FAILED "failed\n"
+#define TEXT_FAILED "failed"
 
 
 
@@ -253,27 +253,20 @@ static void print_status(struct test_case_t *test_case, struct test_info_t *test
 
 
 
-static void print_total(size_t count_pass, size_t count_skip, size_t count_fail)
+static inline void print_counter(const char *format, const char *text, const char *color_text, size_t counter)
+{
+    printf(format, counter, counter ? color_text : text);
+}
+
+
+
+static void print_totals(size_t count_pass, size_t count_skip, size_t count_fail)
 {
     printf("\n\nTotals:");
 
-
-    if(count_pass)
-        printf(" %zu " COLOR_TEXT_PASSED, count_pass);
-    else
-        printf(" %zu " TEXT_PASSED, count_pass);
-
-
-    if(count_skip)
-        printf(", %zu " COLOR_TEXT_SKIPED, count_skip);
-    else
-        printf(", %zu " TEXT_SKIPED, count_skip);
-
-
-    if(count_fail)
-        printf(", %zu " COLOR_TEXT_FAILED, count_fail);
-    else
-        printf(", %zu " TEXT_FAILED, count_fail);
+    print_counter(" %zu %s",    TEXT_PASSED, COLOR_TEXT_PASSED, count_pass);
+    print_counter(", %zu %s",   TEXT_SKIPED, COLOR_TEXT_SKIPED, count_skip);
+    print_counter(", %zu %s\n", TEXT_FAILED, COLOR_TEXT_FAILED, count_fail);
 }
 
 
@@ -304,7 +297,7 @@ static int run_case(struct test_case_t *test_case)
     }
 
 
-    print_total(test_case->count_pass, test_case->count_skip, test_case->count_fail);
+    print_totals(test_case->count_pass, test_case->count_skip, test_case->count_fail);
     print_footer(test_case->case_name);
 
     return test_case->count_fail;
@@ -328,7 +321,7 @@ static inline int run_cases(struct test_case_t *test_cases[], size_t count_cases
 
     if( count_cases > 1 )
     {
-        print_total(count_pass, count_skip, count_fail);
+        print_totals(count_pass, count_skip, count_fail);
         print_footer(NULL);
     }
 
