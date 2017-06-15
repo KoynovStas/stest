@@ -163,28 +163,28 @@ struct test_case_t
 
 
 
-static inline void print_title(const char *first, const char *title, const char *last)
+static inline void print_title(const char *first, struct test_case_t *test_case, const char *last)
 {
     printf("%s", first);
 
-    if(title)
-        printf(" of %s", title);
+    if(test_case && test_case->case_name)
+        printf(" of %s from: %s:%d", test_case->case_name, test_case->file_name, test_case->line_num);
 
     printf("%s", last);
 }
 
 
 
-static inline void print_header(const char *title)
+static inline void print_header(struct test_case_t *test_case)
 {
-    print_title("\n\n---------- Start testing", title, " ----------");
+    print_title("\n\n---------- Start testing", test_case, " ----------");
 }
 
 
 
-static inline void print_footer(const char *title)
+static inline void print_footer(struct test_case_t *test_case)
 {
-    print_title("========== Finished testing", title, " ==========\n");
+    print_title("========== Finished testing", test_case, " ==========\n");
 }
 
 
@@ -250,7 +250,7 @@ static void print_status(struct test_case_t *test_case, struct test_info_t *test
 
 
     if(test_info->msg)
-        printf("  msg:  %s", test_info->msg);
+        printf("  msg: %s", test_info->msg);
 }
 
 
@@ -279,7 +279,7 @@ static int run_case(struct test_case_t *test_case)
     size_t i;
 
 
-    print_header(test_case->case_name);
+    print_header(test_case);
 
 
     for(i = 0; i < test_case->count_tests; ++i)
@@ -300,7 +300,7 @@ static int run_case(struct test_case_t *test_case)
 
 
     print_totals(test_case->count_pass, test_case->count_skip, test_case->count_fail);
-    print_footer(test_case->case_name);
+    print_footer(test_case);
 
     return test_case->count_fail;
 }
