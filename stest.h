@@ -163,26 +163,28 @@ struct test_case_t
 
 
 
-static void print_header(const char *title)
+static inline void print_title(const char *first, const char *title, const char *last)
 {
-    printf("\n\n---------- Start testing");
+    printf("%s", first);
 
     if(title)
         printf(" of %s", title);
 
-    printf(" ----------");
+    printf("%s", last);
 }
 
 
 
-static void print_footer(const char *title)
+static inline void print_header(const char *title)
 {
-    printf("========== Finished testing");
+    print_title("\n\n---------- Start testing", title, " ----------");
+}
 
-    if(title)
-        printf(" of %s", title);
 
-    printf(" ==========\n");
+
+static inline void print_footer(const char *title)
+{
+    print_title("========== Finished testing", title, " ==========\n");
 }
 
 
