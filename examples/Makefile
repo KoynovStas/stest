@@ -2,15 +2,15 @@ CFLAGS   += -std=c99 -O2  -s  -Wall -pedantic
 CFLAGS   += -D__USE_MINGW_ANSI_STDIO=1  #-DWITHOUT_CONSOLE_COLOR
 CFLAGS   += -I..
 
-GCC       = gcc
+CC       ?= gcc
 
 
 
 # list of tests for build
 TESTS  = one_test    \
          many_tests  \
-		 one_case    \
-		 many_cases
+         one_case    \
+         many_cases
 
 
 
@@ -29,7 +29,7 @@ clean:
 
 .PHONY: $(TESTS)
 $(TESTS):
-	$(GCC) $@.c -o $@  $(CFLAGS)
+	$(CC) $@.c -o $@  $(CFLAGS)
 	@echo "  ---- Compiled $@ ----"
 	-@ ./$@
 
