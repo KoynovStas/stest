@@ -115,8 +115,8 @@ static inline struct test_info_t get_test_info( const char *file_name,
 #define TEST_ASSERT_CONCAT_(a, b) a##b
 #define TEST_ASSERT_CONCAT(a, b) TEST_ASSERT_CONCAT_(a, b)
 #define TEST_STATIC_ASSERT(expr) \
-    enum { TEST_ASSERT_CONCAT(assert_line_, __LINE__) = 1/(int)(!!(expr)) }
-
+    enum {TEST_ASSERT_CONCAT(TEST_ASSERT_CONCAT(level_, __INCLUDE_LEVEL__), \
+          TEST_ASSERT_CONCAT(_static_assert_on_line_, __LINE__)) = 1/(int)(!!(expr)) }
 
 
 typedef  struct test_info_t (*ptest_func)(void *data);
@@ -243,7 +243,9 @@ static void print_status(struct test_case_t *test_case, struct test_info_t *test
             break;
 
         default:
-            printf(COLOR_TEXT_FAIL "  %s  in file: %s:%d", test_info->func_name, test_info->file_name, test_info->line_num);
+            printf(COLOR_TEXT_FAIL "  %s  in file: %s:%d", test_info->func_name,
+                                                           test_info->file_name,
+                                                           test_info->line_num);
             test_case->count_fail++;
             break;
     }
