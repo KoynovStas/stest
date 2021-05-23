@@ -185,7 +185,7 @@ static inline void print_header(struct test_case_t *test_case)
 
 static inline void print_footer(struct test_case_t *test_case)
 {
-    print_title("========== Finished testing", test_case, " ==========\n");
+    print_title("========== Finished testing", test_case, " ==========\n\n");
 }
 
 
@@ -339,9 +339,8 @@ static inline int run_cases(struct test_case_t *test_cases[], size_t count_cases
 
 #define MAIN_CASES(test_cases) int main(void) { return run_cases(test_cases, SIZE_OF_ARRAY(test_cases)); }
 
-#define MAIN_TESTS(tests)                             \
-    struct test_case_t test_case = {                  \
-    NULL, NULL, 0, SIZE_OF_ARRAY(tests), tests, NULL};\
+#define MAIN_TESTS(tests)                         \
+    TEST_CASE(test_case, tests, NULL, NULL, NULL) \
     MAIN_CASE(test_case)
 
 
