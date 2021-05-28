@@ -267,7 +267,7 @@ static inline void print_counter(const char *format, const char *text, const cha
 
 static void print_totals(size_t count_pass, size_t count_skip, size_t count_fail)
 {
-    printf("\n\nTotals:");
+    printf("\n\nTotal:");
 
     print_counter(" %zu %s",    TEXT_PASSED, COLOR_TEXT_PASSED, count_pass);
     print_counter(", %zu %s",   TEXT_SKIPED, COLOR_TEXT_SKIPED, count_skip);
