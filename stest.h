@@ -42,8 +42,26 @@
 #ifndef STEST_HEADER
 #define STEST_HEADER
 
+#include <stddef.h>  //size_t
 
-#include <stdio.h>  //printf
+
+
+/*
+ * STest uses the stest_printf macro as a function to print,
+ * if the macro is not defined, we use the standard clib function from stdio.h.
+ * If you are using STest on an embedded system perhaps you have your own
+ * function or less resource-intensive one like xprintf (http://elm-chan.org/fsw/strf/xprintf.html)
+ * Then uncomment the definition and add your function.
+ * The function must have signature like printf and
+ * must support printing for formats: %s %d %u
+ */
+
+//#define  stest_printf  xprintf
+
+#ifndef stest_printf  //use printf from libc
+    #include <stdio.h>
+    #define  stest_printf  printf
+#endif
 
 
 
@@ -96,7 +114,7 @@ struct test_case_t
 
 
     //private
-    size_t status_cnt[STATUS_NUM];
+    unsigned int status_cnt[STATUS_NUM];
 };
 
 
@@ -165,12 +183,12 @@ static inline struct test_info_t get_test_info( const char         *file_name,
 
 static inline void print_title(const char *first, struct test_case_t *test_case, const char *last)
 {
-    printf("%s", first);
+    stest_printf("%s", first);
 
     if(test_case && test_case->case_name)
-        printf(" of %s from: %s:%d", test_case->case_name, test_case->file_name, test_case->line_num);
+        stest_printf(" of %s from: %s:%d", test_case->case_name, test_case->file_name, test_case->line_num);
 
-    printf("%s", last);
+    stest_printf("%s", last);
 }
 
 
@@ -233,46 +251,46 @@ static void print_status(struct test_info_t *test_info)
     switch (test_info->status)
     {
         case STATUS_PASS:
-            printf(COLOR_TEXT_PASS "  %s", test_info->func_name);
+            stest_printf(COLOR_TEXT_PASS "  %s", test_info->func_name);
             break;
 
         case STATUS_SKIP:
-            printf(COLOR_TEXT_SKIP "  %s", test_info->func_name);
+            stest_printf(COLOR_TEXT_SKIP "  %s", test_info->func_name);
             break;
 
         default:
-            printf(COLOR_TEXT_FAIL "  %s  in file: %s:%d", test_info->func_name,
-                                                           test_info->file_name,
-                                                           test_info->line_num);
+            stest_printf(COLOR_TEXT_FAIL "  %s  in file: %s:%d", test_info->func_name,
+                                                                 test_info->file_name,
+                                                                 test_info->line_num);
             break;
     }
 
 
     if(test_info->msg)
-        printf("  msg: %s", test_info->msg);
+        stest_printf("  msg: %s", test_info->msg);
 }
 
 
 
 static inline void print_counter(const char *format, const char *text, const char *color_text, size_t counter)
 {
-    printf(format, counter, counter ? color_text : text);
+    stest_printf(format, counter, counter ? color_text : text);
 }
 
 
 
-static void print_totals(size_t *status_cnt)
+static void print_totals(unsigned int *status_cnt)
 {
-    printf("\n\nTotal:");
+    stest_printf("\n\nTotal:");
 
-    print_counter(" %zu %s",    TEXT_PASSED, COLOR_TEXT_PASSED, status_cnt[STATUS_PASS]);
-    print_counter(", %zu %s",   TEXT_SKIPED, COLOR_TEXT_SKIPED, status_cnt[STATUS_SKIP]);
-    print_counter(", %zu %s\n", TEXT_FAILED, COLOR_TEXT_FAILED, status_cnt[STATUS_FAIL]);
+    print_counter(" %u %s,",  TEXT_PASSED, COLOR_TEXT_PASSED, status_cnt[STATUS_PASS]);
+    print_counter(" %u %s,",  TEXT_SKIPED, COLOR_TEXT_SKIPED, status_cnt[STATUS_SKIP]);
+    print_counter(" %u %s\n", TEXT_FAILED, COLOR_TEXT_FAILED, status_cnt[STATUS_FAIL]);
 }
 
 
 
-static int run_case(struct test_case_t *test_case)
+static unsigned int run_case(struct test_case_t *test_case)
 {
     struct test_info_t test_info;
     size_t i;
@@ -304,10 +322,10 @@ static int run_case(struct test_case_t *test_case)
 
 
 
-static inline int run_cases(struct test_case_t *test_cases[], size_t count_cases)
+static inline unsigned int run_cases(struct test_case_t *test_cases[], size_t count_cases)
 {
     size_t i;
-    size_t total_cnt[STATUS_NUM] = {0, 0, 0};
+    unsigned int total_cnt[STATUS_NUM] = {0, 0, 0};
 
 
     for(i = 0; i < count_cases; ++i)
@@ -330,9 +348,9 @@ static inline int run_cases(struct test_case_t *test_cases[], size_t count_cases
 
 
 
-#define MAIN_CASE(test_case) int main(void) { return run_case(&test_case); }
+#define MAIN_CASE(test_case)   int main(void) { return (int)run_case(&test_case); }
 
-#define MAIN_CASES(test_cases) int main(void) { return run_cases(test_cases, SIZE_OF_ARRAY(test_cases)); }
+#define MAIN_CASES(test_cases) int main(void) { return (int)run_cases(test_cases, SIZE_OF_ARRAY(test_cases)); }
 
 #define MAIN_TESTS(tests)                         \
     TEST_CASE(test_case, tests, NULL, NULL, NULL) \
