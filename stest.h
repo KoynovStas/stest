@@ -53,7 +53,9 @@ enum test_status_t
 {
     STATUS_PASS,
     STATUS_SKIP,
-    STATUS_FAIL
+    STATUS_FAIL,
+
+    STATUS_NUM   //it's not status, used like size of array
 };
 
 
@@ -94,9 +96,7 @@ struct test_case_t
 
 
     //private
-    size_t count_pass;
-    size_t count_skip;
-    size_t count_fail;
+    size_t status_cnt[STATUS_NUM];
 };
 
 
@@ -108,7 +108,7 @@ struct test_case_t
     struct test_case_t _name = {                       \
     __FILE__, #_name, __LINE__,                        \
     SIZE_OF_ARRAY(_tests), _tests,                     \
-   _data, _init, _clean, 0, 0, 0 };
+   _data, _init, _clean, {0, 0, 0} };
 
 
 
@@ -123,6 +123,7 @@ static inline struct test_info_t get_test_info( const char         *file_name,
                                                 const char         *msg,
                                                 struct test_case_t *test_case)
 {
+    test_case->status_cnt[status]++;
     struct test_info_t test_info = {file_name, func_name, line_num, status, msg};
     return test_info;
 }
@@ -227,25 +228,22 @@ static inline void print_footer(struct test_case_t *test_case)
 
 
 
-static void print_status(struct test_case_t *test_case, struct test_info_t *test_info)
+static void print_status(struct test_info_t *test_info)
 {
     switch (test_info->status)
     {
         case STATUS_PASS:
             printf(COLOR_TEXT_PASS "  %s", test_info->func_name);
-            test_case->count_pass++;
             break;
 
         case STATUS_SKIP:
             printf(COLOR_TEXT_SKIP "  %s", test_info->func_name);
-            test_case->count_skip++;
             break;
 
         default:
             printf(COLOR_TEXT_FAIL "  %s  in file: %s:%d", test_info->func_name,
                                                            test_info->file_name,
                                                            test_info->line_num);
-            test_case->count_fail++;
             break;
     }
 
@@ -263,13 +261,13 @@ static inline void print_counter(const char *format, const char *text, const cha
 
 
 
-static void print_totals(size_t count_pass, size_t count_skip, size_t count_fail)
+static void print_totals(size_t *status_cnt)
 {
     printf("\n\nTotal:");
 
-    print_counter(" %zu %s",    TEXT_PASSED, COLOR_TEXT_PASSED, count_pass);
-    print_counter(", %zu %s",   TEXT_SKIPED, COLOR_TEXT_SKIPED, count_skip);
-    print_counter(", %zu %s\n", TEXT_FAILED, COLOR_TEXT_FAILED, count_fail);
+    print_counter(" %zu %s",    TEXT_PASSED, COLOR_TEXT_PASSED, status_cnt[STATUS_PASS]);
+    print_counter(", %zu %s",   TEXT_SKIPED, COLOR_TEXT_SKIPED, status_cnt[STATUS_SKIP]);
+    print_counter(", %zu %s\n", TEXT_FAILED, COLOR_TEXT_FAILED, status_cnt[STATUS_FAIL]);
 }
 
 
@@ -294,14 +292,14 @@ static int run_case(struct test_case_t *test_case)
             test_case->clean(test_case);
 
 
-        print_status(test_case, &test_info);
+        print_status(&test_info);
     }
 
 
-    print_totals(test_case->count_pass, test_case->count_skip, test_case->count_fail);
+    print_totals(test_case->status_cnt);
     print_footer(test_case);
 
-    return test_case->count_fail;
+    return test_case->status_cnt[STATUS_FAIL];
 }
 
 
@@ -309,24 +307,25 @@ static int run_case(struct test_case_t *test_case)
 static inline int run_cases(struct test_case_t *test_cases[], size_t count_cases)
 {
     size_t i;
-    size_t count_pass = 0, count_skip = 0, count_fail = 0;
+    size_t total_cnt[STATUS_NUM] = {0, 0, 0};
 
 
     for(i = 0; i < count_cases; ++i)
     {
-       count_fail += run_case(test_cases[i]);
+       total_cnt[STATUS_FAIL] += run_case(test_cases[i]);
 
-       count_pass += test_cases[i]->count_pass;
-       count_skip += test_cases[i]->count_skip;
+       total_cnt[STATUS_PASS] += test_cases[i]->status_cnt[STATUS_PASS];
+       total_cnt[STATUS_SKIP] += test_cases[i]->status_cnt[STATUS_SKIP];
+
     }
 
     if( count_cases > 1 )
     {
-        print_totals(count_pass, count_skip, count_fail);
+        print_totals(total_cnt);
         print_footer(NULL);
     }
 
-    return count_fail;
+    return total_cnt[STATUS_FAIL];
 }
 
 
