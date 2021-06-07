@@ -70,63 +70,11 @@ struct test_info_t
 };
 
 
-
-#define TEST(name) static struct test_info_t name(void *data)
-
-
-
-static inline struct test_info_t get_test_info( const char *file_name,
-                                                const char *func_name,
-                                                int         line_num,
-                                                int         status,
-                                                const char *msg,
-                                                void       *data)
-{
-    (void)data; //it need if user don't use data in TEST
-    struct test_info_t test_info = {file_name, func_name, line_num, status, msg};
-    return test_info;
-}
-
-#define TEST_PASS(msg)  return get_test_info(__FILE__, __func__, __LINE__, STATUS_PASS, msg, data)
-#define TEST_SKIP(msg)  return get_test_info(__FILE__, __func__, __LINE__, STATUS_SKIP, msg, data)
-#define TEST_FAIL(msg)  return get_test_info(__FILE__, __func__, __LINE__, STATUS_FAIL, msg, data)
-
-
-
-#define TEST_ASSERT2(expr, msg)  if( !(expr) ) TEST_FAIL(msg)
-#define TEST_ASSERT(expr)  TEST_ASSERT2(expr, NULL)
-
-
-/*
- * For GCC 4.6 or higher, in C++ you can use a standard right static_assert(exp, msg)
- * in *.c and in *.h files.
- * For GCC 4.6 is required to add CFLAGS += -std="c++0x"
- * Simple C (gcc) have not static_assert.
- * A lot of variants, it is the most simple and intuitive
- * It can be used in *.c and in *.h files.
- * (macros that use function style can be used in *.c files only)
- *
- * Disadvantages: you can not be set msg to display the console when compiling
- *
- * Example:
- *
- * TEST_STATIC_ASSERT( sizeof(char) == 1)  //good job
- * TEST_STATIC_ASSERT( sizeof(char) != 1)  //You will get a compilation error
-*/
-#define TEST_ASSERT_CONCAT_(a, b) a##b
-#define TEST_ASSERT_CONCAT(a, b) TEST_ASSERT_CONCAT_(a, b)
-#define TEST_STATIC_ASSERT(expr) \
-    enum {TEST_ASSERT_CONCAT(TEST_ASSERT_CONCAT(level_, __INCLUDE_LEVEL__), \
-          TEST_ASSERT_CONCAT(_static_assert_on_line_, __LINE__)) = 1/(int)(!!(expr)) }
-
-
-typedef  struct test_info_t (*ptest_func)(void *data);
-
-
 struct test_case_t;
 
-typedef  void  (*pinit_func)(struct test_case_t *test_case);
-typedef  void  (*pclean_func)(struct test_case_t *test_case);
+typedef  struct test_info_t (*ptest_func) (struct test_case_t *test_case);
+typedef  void               (*pinit_func) (struct test_case_t *test_case);
+typedef  void               (*pclean_func)(struct test_case_t *test_case);
 
 
 
@@ -161,6 +109,56 @@ struct test_case_t
     __FILE__, #_name, __LINE__,                        \
     SIZE_OF_ARRAY(_tests), _tests,                     \
    _data, _init, _clean, 0, 0, 0 };
+
+
+
+#define TEST(name) static struct test_info_t name(struct test_case_t *test_case)
+
+
+
+static inline struct test_info_t get_test_info( const char         *file_name,
+                                                const char         *func_name,
+                                                int                 line_num,
+                                                int                 status,
+                                                const char         *msg,
+                                                struct test_case_t *test_case)
+{
+    struct test_info_t test_info = {file_name, func_name, line_num, status, msg};
+    return test_info;
+}
+
+#define TEST_PASS(msg)  return get_test_info(__FILE__, __func__, __LINE__, STATUS_PASS, msg, test_case)
+#define TEST_SKIP(msg)  return get_test_info(__FILE__, __func__, __LINE__, STATUS_SKIP, msg, test_case)
+#define TEST_FAIL(msg)  return get_test_info(__FILE__, __func__, __LINE__, STATUS_FAIL, msg, test_case)
+
+
+
+#define TEST_ASSERT2(expr, msg)  if( !(expr) ) TEST_FAIL(msg)
+#define TEST_ASSERT(expr)  TEST_ASSERT2(expr, NULL)
+
+
+/*
+ * For GCC 4.6 or higher, in C++ you can use a standard right static_assert(exp, msg)
+ * in *.c and in *.h files.
+ * For GCC 4.6 is required to add CFLAGS += -std="c++0x"
+ * Simple C (gcc) have not static_assert.
+ * A lot of variants, it is the most simple and intuitive
+ * It can be used in *.c and in *.h files.
+ * (macros that use function style can be used in *.c files only)
+ *
+ * Disadvantages: you can not be set msg to display the console when compiling
+ *
+ * Example:
+ *
+ * TEST_STATIC_ASSERT( sizeof(char) == 1)  //good job
+ * TEST_STATIC_ASSERT( sizeof(char) != 1)  //You will get a compilation error
+*/
+#define TEST_ASSERT_CONCAT_(a, b) a##b
+#define TEST_ASSERT_CONCAT(a, b) TEST_ASSERT_CONCAT_(a, b)
+#define TEST_STATIC_ASSERT(expr) \
+    enum {TEST_ASSERT_CONCAT(TEST_ASSERT_CONCAT(level_, __INCLUDE_LEVEL__), \
+          TEST_ASSERT_CONCAT(_static_assert_on_line_, __LINE__)) = 1/(int)(!!(expr)) }
+
 
 
 
@@ -290,9 +288,7 @@ static int run_case(struct test_case_t *test_case)
         if( test_case->init )
             test_case->init(test_case);
 
-
-        test_info = test_case->tests[i](test_case->data); //run test
-
+        test_info = test_case->tests[i](test_case); //run test
 
         if( test_case->clean )
             test_case->clean(test_case);
