@@ -5,16 +5,24 @@
 
 STest is simple unit tests for C/C++.
 
+
+
+<p align="center">
+<img src="./screenshot.png" width="800"></img>
+</p>
+
+
+
 ### Features:
 
-* The code uses only the standard C99 This allows you to use the template in the oldest projects with older compilers.
+* The code uses only the standard C99 This allows you to use the STest in the oldest projects with older compilers.
 * The code has no dependencies, and imprisoned in the one file.
 * Support simple (single) tests.
 * Support case(s) of tests.
-* Support `init` and `clean` functions for test case.
+* Support `init` and `clean` functions for test in case.
 * Support three levels (`PASS`, `SKIP`, `FAIL`)
 * Support macro `ASSERT` and `STATIC_ASSERT`
-* Support color in console (optional).
+* Support color in console (optional) see [stest.h](./stest.h)
 
 
 ## Usage
@@ -26,6 +34,15 @@ STest is simple unit tests for C/C++.
 4. Or use the macros `TEST_ASSERT(expr)`, `TEST_ASSERT2(expr, msg)`
 5. Use the macro `MAIN_*` for declare function main.
 6. Compile and run test.
+
+
+> Note:
+  STest uses the standard clib printf function from stdio.h.
+  If you are using STest on an embedded system perhaps you have your own
+  function or less resource-intensive one like [xprintf](http://elm-chan.org/fsw/strf/xprintf.html)
+  Then uncomment the definition `stest_ptintf` and add your function.
+  The function must have signature like printf and must support printing for formats: %s %d %u
+
 
 
 ## License
