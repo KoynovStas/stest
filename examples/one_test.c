@@ -10,7 +10,7 @@ TEST(test_1)
 
 
 
-ptest_func tests[] =
+stest_func tests[] =
 {
     test_1,
 };

@@ -45,7 +45,7 @@ TEST(test_fail2)
 
 
 
-ptest_func tests[] =
+stest_func tests[] =
 {
     test_pass,
     test_pass2,

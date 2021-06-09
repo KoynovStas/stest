@@ -46,6 +46,8 @@
 
 
 
+
+
 /*
  * STest uses the stest_printf macro as a function to print,
  * if the macro is not defined, we use the standard clib function from stdio.h.
@@ -76,14 +78,13 @@
 
 
 
-
 enum test_status_t
 {
-    STATUS_PASS,
-    STATUS_SKIP,
-    STATUS_FAIL,
+    TEST_STATUS_PASS,
+    TEST_STATUS_SKIP,
+    TEST_STATUS_FAIL,
 
-    STATUS_NUM   //it's not status, used like size of array
+    TEST_STATUS_NUM   //it's not status, used like size of array
 };
 
 
@@ -102,29 +103,28 @@ struct test_info_t
 
 struct test_case_t;
 
-typedef  struct test_info_t (*ptest_func) (struct test_case_t *test_case);
-typedef  void               (*pinit_func) (struct test_case_t *test_case);
-typedef  void               (*pclean_func)(struct test_case_t *test_case);
+typedef  struct test_info_t (*stest_func)      (struct test_case_t *test_case);
+typedef  void               (*stest_init_func) (struct test_case_t *test_case);
+typedef  void               (*stest_clean_func)(struct test_case_t *test_case);
 
 
 
 struct test_case_t
 {
-    const char *file_name;
-    const char *case_name;
-    int         line_num;
-    size_t      count_tests;
-
-    ptest_func *tests;
-
-    void       *data;
-
-    pinit_func  init;
-    pclean_func clean;
-
+    //public
+    void             *data;        //user data
+    stest_init_func   init;        //user func for init
+    stest_clean_func  clean;       //user func for clean
 
     //private
-    unsigned int status_cnt[STATUS_NUM];
+    const char   *file_name;
+    const char   *case_name;
+    int           line_num;
+
+    size_t        count_tests;
+    stest_func   *tests;
+
+    unsigned int  status_cnt[TEST_STATUS_NUM];
 };
 
 
@@ -134,9 +134,10 @@ struct test_case_t
 
 #define TEST_CASE(_name, _tests, _data, _init, _clean) \
     struct test_case_t _name = {                       \
-    __FILE__, #_name, __LINE__,                        \
-    STEST_SIZE_OF_ARRAY(_tests), _tests,               \
-   _data, _init, _clean, {0, 0, 0} };
+   _data, _init, _clean,                               \
+   __FILE__, #_name, __LINE__,                         \
+   STEST_SIZE_OF_ARRAY(_tests), _tests,                \
+   {0, 0, 0} };
 
 
 
@@ -156,9 +157,9 @@ static inline struct test_info_t get_test_info( const char         *file_name,
     return test_info;
 }
 
-#define TEST_PASS(msg)  return get_test_info(__FILE__, __func__, __LINE__, STATUS_PASS, msg, test_case)
-#define TEST_SKIP(msg)  return get_test_info(__FILE__, __func__, __LINE__, STATUS_SKIP, msg, test_case)
-#define TEST_FAIL(msg)  return get_test_info(__FILE__, __func__, __LINE__, STATUS_FAIL, msg, test_case)
+#define TEST_PASS(msg)  return get_test_info(__FILE__, __func__, __LINE__, TEST_STATUS_PASS, msg, test_case)
+#define TEST_SKIP(msg)  return get_test_info(__FILE__, __func__, __LINE__, TEST_STATUS_SKIP, msg, test_case)
+#define TEST_FAIL(msg)  return get_test_info(__FILE__, __func__, __LINE__, TEST_STATUS_FAIL, msg, test_case)
 
 
 
@@ -190,35 +191,37 @@ static inline struct test_info_t get_test_info( const char         *file_name,
 
 
 
-#define COLOR_TEXT_NORMAL "\033[0m"
-#define COLOR_TEXT_RED    "\033[31m"
-#define COLOR_TEXT_GREEN  "\033[32m"
-#define COLOR_TEXT_YELLOW "\033[33m"
+#define STEST_COLOR_TEXT_NORMAL "\033[0m"
+#define STEST_COLOR_TEXT_RED    "\033[31m"
+#define STEST_COLOR_TEXT_GREEN  "\033[32m"
+#define STEST_COLOR_TEXT_YELLOW "\033[33m"
 
 
 
-static inline void print_title(const char *first, struct test_case_t *test_case, const char *last)
+static inline void stest_print_title(const char *first, struct test_case_t *test_case, const char *last)
 {
     stest_printf("%s", first);
 
     if(test_case && test_case->case_name)
-        stest_printf(" of %s from: %s:%d", test_case->case_name, test_case->file_name, test_case->line_num);
+        stest_printf(" of %s from: %s:%d", test_case->case_name,
+                                           test_case->file_name,
+                                           test_case->line_num);
 
     stest_printf("%s", last);
 }
 
 
 
-static inline void print_header(struct test_case_t *test_case)
+static inline void stest_print_header(struct test_case_t *test_case)
 {
-    print_title("\n\n---------- Start testing", test_case, " ----------");
+    stest_print_title("\n\n---------- Start testing", test_case, " ----------");
 }
 
 
 
-static inline void print_footer(struct test_case_t *test_case)
+static inline void stest_print_footer(struct test_case_t *test_case)
 {
-    print_title("========== Finished testing", test_case, " ==========\n\n");
+    stest_print_title("========== Finished testing", test_case, " ==========\n\n");
 }
 
 
@@ -226,16 +229,15 @@ static inline void print_footer(struct test_case_t *test_case)
 static inline void stest_print_msg(const char *msg, const char *color)
 {
     if(color && STEST_CONSOLE_COLOR)
-        stest_printf("%s%s" COLOR_TEXT_NORMAL, color, msg);
+        stest_printf("%s%s" STEST_COLOR_TEXT_NORMAL, color, msg);
     else
         stest_printf("%s", msg);
 }
 
 
 
-static void print_status_detail(struct test_info_t *test_info, int more_info, const char *color_msg)
+static void stest_print_info(struct test_info_t *test_info, int more_info, const char *color_msg)
 {
-
     stest_printf("  %s", test_info->func_name);
 
     if(more_info)
@@ -261,25 +263,25 @@ struct print_status_inf
 
 
 
-static void print_status(struct test_info_t *test_info)
+static void stest_print_status(struct test_info_t *test_info)
 {
-    static const struct print_status_inf data[STATUS_NUM] = {
+    static const struct print_status_inf data[TEST_STATUS_NUM] = {
         {
             "\nPASS: ",
-            COLOR_TEXT_GREEN,
-            STEST_PASS_MSG_COLOR ? COLOR_TEXT_GREEN : NULL,
+            STEST_COLOR_TEXT_GREEN,
+            STEST_PASS_MSG_COLOR ? STEST_COLOR_TEXT_GREEN : NULL,
             STEST_PASS_MORE_INFO,
         },
         {
             "\nSKIP: ",
-            COLOR_TEXT_YELLOW,
-            STEST_SKIP_MSG_COLOR ? COLOR_TEXT_YELLOW : NULL,
+            STEST_COLOR_TEXT_YELLOW,
+            STEST_SKIP_MSG_COLOR ? STEST_COLOR_TEXT_YELLOW : NULL,
             STEST_SKIP_MORE_INFO,
         },
         {
             "\nFAIL: ",
-            COLOR_TEXT_RED,
-            STEST_FAIL_MSG_COLOR ? COLOR_TEXT_RED : NULL,
+            STEST_COLOR_TEXT_RED,
+            STEST_FAIL_MSG_COLOR ? STEST_COLOR_TEXT_RED : NULL,
             STEST_FAIL_MORE_INFO,
         },
     };
@@ -287,12 +289,12 @@ static void print_status(struct test_info_t *test_info)
     const struct print_status_inf *inf = &data[test_info->status];
 
     stest_print_msg(inf->prefix, inf->prefix_color);
-    print_status_detail(test_info, inf->more_info, inf->msg_color);
+    stest_print_info(test_info, inf->more_info, inf->msg_color);
 }
 
 
 
-static inline void print_counter(const char *text, const char *color, unsigned int counter)
+static inline void stest_print_counter(const char *text, const char *color, unsigned int counter)
 {
     stest_printf(" %u - ",  counter);
     stest_print_msg(text, counter ? color : NULL);
@@ -300,13 +302,13 @@ static inline void print_counter(const char *text, const char *color, unsigned i
 
 
 
-static void print_totals(unsigned int *status_cnt)
+static void stest_print_totals(unsigned int *status_cnt)
 {
     stest_printf("\n\nTotal:");
 
-    print_counter("passed"  , COLOR_TEXT_GREEN , status_cnt[STATUS_PASS]);
-    print_counter("skipped" , COLOR_TEXT_YELLOW, status_cnt[STATUS_SKIP]);
-    print_counter("failed\n", COLOR_TEXT_RED   , status_cnt[STATUS_FAIL]);
+    stest_print_counter("passed"  , STEST_COLOR_TEXT_GREEN , status_cnt[TEST_STATUS_PASS]);
+    stest_print_counter("skipped" , STEST_COLOR_TEXT_YELLOW, status_cnt[TEST_STATUS_SKIP]);
+    stest_print_counter("failed\n", STEST_COLOR_TEXT_RED   , status_cnt[TEST_STATUS_FAIL]);
 }
 
 
@@ -317,7 +319,7 @@ static unsigned int run_case(struct test_case_t *test_case)
     size_t i;
 
 
-    print_header(test_case);
+    stest_print_header(test_case);
 
 
     for(i = 0; i < test_case->count_tests; ++i)
@@ -331,14 +333,14 @@ static unsigned int run_case(struct test_case_t *test_case)
             test_case->clean(test_case);
 
 
-        print_status(&test_info);
+        stest_print_status(&test_info);
     }
 
 
-    print_totals(test_case->status_cnt);
-    print_footer(test_case);
+    stest_print_totals(test_case->status_cnt);
+    stest_print_footer(test_case);
 
-    return test_case->status_cnt[STATUS_FAIL];
+    return test_case->status_cnt[TEST_STATUS_FAIL];
 }
 
 
@@ -346,25 +348,25 @@ static unsigned int run_case(struct test_case_t *test_case)
 static inline unsigned int run_cases(struct test_case_t *test_cases[], size_t count_cases)
 {
     size_t i;
-    unsigned int total_cnt[STATUS_NUM] = {0, 0, 0};
+    unsigned int total_cnt[TEST_STATUS_NUM] = {0, 0, 0};
 
 
     for(i = 0; i < count_cases; ++i)
     {
-       total_cnt[STATUS_FAIL] += run_case(test_cases[i]);
+       total_cnt[TEST_STATUS_FAIL] += run_case(test_cases[i]);
 
-       total_cnt[STATUS_PASS] += test_cases[i]->status_cnt[STATUS_PASS];
-       total_cnt[STATUS_SKIP] += test_cases[i]->status_cnt[STATUS_SKIP];
+       total_cnt[TEST_STATUS_PASS] += test_cases[i]->status_cnt[TEST_STATUS_PASS];
+       total_cnt[TEST_STATUS_SKIP] += test_cases[i]->status_cnt[TEST_STATUS_SKIP];
 
     }
 
     if( count_cases > 1 )
     {
-        print_totals(total_cnt);
-        print_footer(NULL);
+        stest_print_totals(total_cnt);
+        stest_print_footer(NULL);
     }
 
-    return total_cnt[STATUS_FAIL];
+    return total_cnt[TEST_STATUS_FAIL];
 }
 
 
