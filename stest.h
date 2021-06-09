@@ -251,31 +251,43 @@ static void print_status_detail(struct test_info_t *test_info, int more_info, co
 
 
 
+struct print_status_inf
+{
+    const char *prefix;
+    const char *prefix_color;
+    const char *msg_color;
+    int         more_info;
+};
+
+
+
 static void print_status(struct test_info_t *test_info)
 {
-    switch (test_info->status)
-    {
-        case STATUS_PASS:
-            stest_print_msg("\nPASS: ", COLOR_TEXT_GREEN);
-            print_status_detail(test_info,
-                                STEST_PASS_MORE_INFO,
-                                STEST_PASS_MSG_COLOR ? COLOR_TEXT_GREEN : NULL);
-            break;
+    static const struct print_status_inf data[STATUS_NUM] = {
+        {
+            "\nPASS: ",
+            COLOR_TEXT_GREEN,
+            STEST_PASS_MSG_COLOR ? COLOR_TEXT_GREEN : NULL,
+            STEST_PASS_MORE_INFO,
+        },
+        {
+            "\nSKIP: ",
+            COLOR_TEXT_YELLOW,
+            STEST_SKIP_MSG_COLOR ? COLOR_TEXT_YELLOW : NULL,
+            STEST_SKIP_MORE_INFO,
+        },
+        {
+            "\nFAIL: ",
+            COLOR_TEXT_RED,
+            STEST_FAIL_MSG_COLOR ? COLOR_TEXT_RED : NULL,
+            STEST_FAIL_MORE_INFO,
+        },
+    };
 
-        case STATUS_SKIP:
-            stest_print_msg("\nSKIP: ", COLOR_TEXT_YELLOW);
-            print_status_detail(test_info,
-                                STEST_SKIP_MORE_INFO,
-                                STEST_SKIP_MSG_COLOR ? COLOR_TEXT_YELLOW : NULL);
-            break;
+    const struct print_status_inf *inf = &data[test_info->status];
 
-        default:
-            stest_print_msg("\nFAIL: ", COLOR_TEXT_RED);
-            print_status_detail(test_info,
-                                STEST_FAIL_MORE_INFO,
-                                STEST_FAIL_MSG_COLOR ? COLOR_TEXT_RED : NULL);
-            break;
-    }
+    stest_print_msg(inf->prefix, inf->prefix_color);
+    print_status_detail(test_info, inf->more_info, inf->msg_color);
 }
 
 
