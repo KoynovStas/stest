@@ -70,6 +70,9 @@
 #define STEST_SKIP_MSG_COLOR  0  //1 - on  0 - off; color print for user message
 #define STEST_FAIL_MSG_COLOR  1  //1 - on  0 - off; color print for user message
 
+#define STEST_PASS_MORE_INFO  0  //1 - on  0 - off; show more info (file:line)
+#define STEST_SKIP_MORE_INFO  0  //1 - on  0 - off; show more info (file:line)
+#define STEST_FAIL_MORE_INFO  1  //1 - on  0 - off; show more info (file:line)
 
 
 
@@ -230,38 +233,48 @@ static inline void stest_print_msg(const char *msg, const char *color)
 
 
 
-static void print_status(struct test_info_t *test_info)
+static void print_status_detail(struct test_info_t *test_info, int more_info, const char *color_msg)
 {
-    const char *color_msg;
 
-    switch (test_info->status)
-    {
-        case STATUS_PASS:
-            stest_print_msg("\nPASS: ", COLOR_TEXT_GREEN);
-            stest_printf("  %s", test_info->func_name);
-            color_msg = STEST_PASS_MSG_COLOR ? COLOR_TEXT_GREEN : NULL;
-            break;
+    stest_printf("  %s", test_info->func_name);
 
-        case STATUS_SKIP:
-            stest_print_msg("\nSKIP: ", COLOR_TEXT_YELLOW);
-            stest_printf("  %s", test_info->func_name);
-            color_msg = STEST_SKIP_MSG_COLOR ? COLOR_TEXT_YELLOW : NULL;
-            break;
-
-        default:
-            stest_print_msg("\nFAIL: ", COLOR_TEXT_RED);
-            stest_printf("  %s  in file: %s:%d", test_info->func_name,
-                                                 test_info->file_name,
-                                                 test_info->line_num);
-            color_msg = STEST_FAIL_MSG_COLOR ? COLOR_TEXT_RED : NULL;
-            break;
-    }
-
+    if(more_info)
+        stest_printf("  in file: %s:%d", test_info->file_name,
+                                         test_info->line_num);
 
     if(test_info->msg)
     {
         stest_printf("  msg: ");
         stest_print_msg(test_info->msg, color_msg);
+    }
+}
+
+
+
+static void print_status(struct test_info_t *test_info)
+{
+    switch (test_info->status)
+    {
+        case STATUS_PASS:
+            stest_print_msg("\nPASS: ", COLOR_TEXT_GREEN);
+            print_status_detail(test_info,
+                                STEST_PASS_MORE_INFO,
+                                STEST_PASS_MSG_COLOR ? COLOR_TEXT_GREEN : NULL);
+            break;
+
+        case STATUS_SKIP:
+            stest_print_msg("\nSKIP: ", COLOR_TEXT_YELLOW);
+            print_status_detail(test_info,
+                                STEST_SKIP_MORE_INFO,
+                                STEST_SKIP_MSG_COLOR ? COLOR_TEXT_YELLOW : NULL);
+            break;
+
+        default:
+            stest_print_msg("\nFAIL: ", COLOR_TEXT_RED);
+            print_status_detail(test_info,
+                                STEST_FAIL_MORE_INFO,
+                                STEST_FAIL_MSG_COLOR ? COLOR_TEXT_RED : NULL);
+            break;
     }
 }
 
