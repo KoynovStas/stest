@@ -129,13 +129,13 @@ struct test_case_t
 
 
 
-#define  SIZE_OF_ARRAY(array) (sizeof(array) / sizeof(array[0]))
+#define STEST_SIZE_OF_ARRAY(array) (sizeof(array) / sizeof(array[0]))
 
 
 #define TEST_CASE(_name, _tests, _data, _init, _clean) \
     struct test_case_t _name = {                       \
     __FILE__, #_name, __LINE__,                        \
-    SIZE_OF_ARRAY(_tests), _tests,                     \
+    STEST_SIZE_OF_ARRAY(_tests), _tests,               \
    _data, _init, _clean, {0, 0, 0} };
 
 
@@ -371,7 +371,7 @@ static inline unsigned int run_cases(struct test_case_t *test_cases[], size_t co
 
 #define MAIN_CASE(test_case)   int main(void) { return (int)run_case(&test_case); }
 
-#define MAIN_CASES(test_cases) int main(void) { return (int)run_cases(test_cases, SIZE_OF_ARRAY(test_cases)); }
+#define MAIN_CASES(test_cases) int main(void) { return (int)run_cases(test_cases, STEST_SIZE_OF_ARRAY(test_cases)); }
 
 #define MAIN_TESTS(tests)                         \
     TEST_CASE(test_case, tests, NULL, NULL, NULL) \
