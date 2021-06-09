@@ -65,6 +65,13 @@
 
 
 
+#define STEST_CONSOLE_COLOR   1  //1 - on  0 - off; common support color print
+#define STEST_PASS_MSG_COLOR  0  //1 - on  0 - off; color print for user message
+#define STEST_SKIP_MSG_COLOR  0  //1 - on  0 - off; color print for user message
+#define STEST_FAIL_MSG_COLOR  1  //1 - on  0 - off; color print for user message
+
+
+
 
 
 enum test_status_t
@@ -180,6 +187,12 @@ static inline struct test_info_t get_test_info( const char         *file_name,
 
 
 
+#define COLOR_TEXT_NORMAL "\033[0m"
+#define COLOR_TEXT_RED    "\033[31m"
+#define COLOR_TEXT_GREEN  "\033[32m"
+#define COLOR_TEXT_YELLOW "\033[33m"
+
+
 
 static inline void print_title(const char *first, struct test_case_t *test_case, const char *last)
 {
@@ -207,74 +220,57 @@ static inline void print_footer(struct test_case_t *test_case)
 
 
 
-#define TEXT_PASS "\nPASS: "
-#define TEXT_SKIP "\nSKIP: "
-#define TEXT_FAIL "\nFAIL: "
-
-#define TEXT_PASSED "passed"
-#define TEXT_SKIPED "skipped"
-#define TEXT_FAILED "failed"
-
-
-
-#ifdef WITHOUT_CONSOLE_COLOR
-
-    #define COLOR_TEXT_PASS  TEXT_PASS
-    #define COLOR_TEXT_SKIP  TEXT_SKIP
-    #define COLOR_TEXT_FAIL  TEXT_FAIL
-
-    #define COLOR_TEXT_PASSED  TEXT_PASSED
-    #define COLOR_TEXT_SKIPED  TEXT_SKIPED
-    #define COLOR_TEXT_FAILED  TEXT_FAILED
-
-#else
-
-    #define COLOR_TEXT_NORMAL "\033[0m"
-    #define COLOR_TEXT_RED    "\033[31m"
-    #define COLOR_TEXT_GREEN  "\033[32m"
-    #define COLOR_TEXT_YELLOW "\033[33m"
-
-    #define COLOR_TEXT_PASS COLOR_TEXT_GREEN   TEXT_PASS  COLOR_TEXT_NORMAL
-    #define COLOR_TEXT_SKIP COLOR_TEXT_YELLOW  TEXT_SKIP  COLOR_TEXT_NORMAL
-    #define COLOR_TEXT_FAIL COLOR_TEXT_RED     TEXT_FAIL  COLOR_TEXT_NORMAL
-
-    #define COLOR_TEXT_PASSED COLOR_TEXT_GREEN   TEXT_PASSED  COLOR_TEXT_NORMAL
-    #define COLOR_TEXT_SKIPED COLOR_TEXT_YELLOW  TEXT_SKIPED  COLOR_TEXT_NORMAL
-    #define COLOR_TEXT_FAILED COLOR_TEXT_RED     TEXT_FAILED  COLOR_TEXT_NORMAL
-
-#endif
+static inline void stest_print_msg(const char *msg, const char *color)
+{
+    if(color && STEST_CONSOLE_COLOR)
+        stest_printf("%s%s" COLOR_TEXT_NORMAL, color, msg);
+    else
+        stest_printf("%s", msg);
+}
 
 
 
 static void print_status(struct test_info_t *test_info)
 {
+    const char *color_msg;
+
     switch (test_info->status)
     {
         case STATUS_PASS:
-            stest_printf(COLOR_TEXT_PASS "  %s", test_info->func_name);
+            stest_print_msg("\nPASS: ", COLOR_TEXT_GREEN);
+            stest_printf("  %s", test_info->func_name);
+            color_msg = STEST_PASS_MSG_COLOR ? COLOR_TEXT_GREEN : NULL;
             break;
 
         case STATUS_SKIP:
-            stest_printf(COLOR_TEXT_SKIP "  %s", test_info->func_name);
+            stest_print_msg("\nSKIP: ", COLOR_TEXT_YELLOW);
+            stest_printf("  %s", test_info->func_name);
+            color_msg = STEST_SKIP_MSG_COLOR ? COLOR_TEXT_YELLOW : NULL;
             break;
 
         default:
-            stest_printf(COLOR_TEXT_FAIL "  %s  in file: %s:%d", test_info->func_name,
-                                                                 test_info->file_name,
-                                                                 test_info->line_num);
+            stest_print_msg("\nFAIL: ", COLOR_TEXT_RED);
+            stest_printf("  %s  in file: %s:%d", test_info->func_name,
+                                                 test_info->file_name,
+                                                 test_info->line_num);
+            color_msg = STEST_FAIL_MSG_COLOR ? COLOR_TEXT_RED : NULL;
             break;
     }
 
 
     if(test_info->msg)
-        stest_printf("  msg: %s", test_info->msg);
+    {
+        stest_printf("  msg: ");
+        stest_print_msg(test_info->msg, color_msg);
+    }
 }
 
 
 
-static inline void print_counter(const char *format, const char *text, const char *color_text, size_t counter)
+static inline void print_counter(const char *text, const char *color, unsigned int counter)
 {
-    stest_printf(format, counter, counter ? color_text : text);
+    stest_printf(" %u - ",  counter);
+    stest_print_msg(text, counter ? color : NULL);
 }
 
 
@@ -283,9 +279,9 @@ static void print_totals(unsigned int *status_cnt)
 {
     stest_printf("\n\nTotal:");
 
-    print_counter(" %u %s,",  TEXT_PASSED, COLOR_TEXT_PASSED, status_cnt[STATUS_PASS]);
-    print_counter(" %u %s,",  TEXT_SKIPED, COLOR_TEXT_SKIPED, status_cnt[STATUS_SKIP]);
-    print_counter(" %u %s\n", TEXT_FAILED, COLOR_TEXT_FAILED, status_cnt[STATUS_FAIL]);
+    print_counter("passed"  , COLOR_TEXT_GREEN , status_cnt[STATUS_PASS]);
+    print_counter("skipped" , COLOR_TEXT_YELLOW, status_cnt[STATUS_SKIP]);
+    print_counter("failed\n", COLOR_TEXT_RED   , status_cnt[STATUS_FAIL]);
 }
 
 
