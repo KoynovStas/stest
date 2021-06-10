@@ -145,6 +145,7 @@ struct test_case_t
 
 
 
+__attribute__((used))
 static inline struct test_info_t get_test_info( const char         *file_name,
                                                 const char         *func_name,
                                                 int                 line_num,
@@ -188,6 +189,7 @@ static inline struct test_info_t get_test_info( const char         *file_name,
 #define TEST_STATIC_ASSERT(expr) \
     enum {TEST_ASSERT_CONCAT(TEST_ASSERT_CONCAT(level_, __INCLUDE_LEVEL__), \
           TEST_ASSERT_CONCAT(_static_assert_on_line_, __LINE__)) = 1/(int)(!!(expr)) }
+
 
 
 
@@ -345,6 +347,7 @@ static unsigned int run_case(struct test_case_t *test_case)
 
 
 
+__attribute__((unused))
 static inline unsigned int run_cases(struct test_case_t *test_cases[], size_t count_cases)
 {
     size_t i;
