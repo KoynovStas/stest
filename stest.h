@@ -298,8 +298,9 @@ static void stest_print_status(struct test_info_t *test_info)
 
 static inline void stest_print_counter(const char *text, const char *color, unsigned int counter)
 {
-    stest_printf(" %u - ",  counter);
-    stest_print_msg(text, counter ? color : NULL);
+    stest_printf("%s", (counter && STEST_CONSOLE_COLOR) ? color : "");
+    stest_printf(" %u %s", counter, text);
+    stest_printf(STEST_COLOR_TEXT_NORMAL);
 }
 
 
@@ -308,9 +309,12 @@ static void stest_print_totals(unsigned int *status_cnt)
 {
     stest_printf("\n\nTotal:");
 
-    stest_print_counter("passed"  , STEST_COLOR_TEXT_GREEN , status_cnt[TEST_STATUS_PASS]);
-    stest_print_counter("skipped" , STEST_COLOR_TEXT_YELLOW, status_cnt[TEST_STATUS_SKIP]);
-    stest_print_counter("failed\n", STEST_COLOR_TEXT_RED   , status_cnt[TEST_STATUS_FAIL]);
+    stest_print_counter("passed," , STEST_COLOR_TEXT_GREEN , status_cnt[TEST_STATUS_PASS]);
+    stest_print_counter("skipped,", STEST_COLOR_TEXT_YELLOW, status_cnt[TEST_STATUS_SKIP]);
+    stest_print_counter("failed," , STEST_COLOR_TEXT_RED   , status_cnt[TEST_STATUS_FAIL]);
+    stest_print_counter("total\n" , ""                     , status_cnt[TEST_STATUS_PASS]+
+                                                             status_cnt[TEST_STATUS_SKIP]+
+                                                             status_cnt[TEST_STATUS_FAIL]);
 }
 
 
