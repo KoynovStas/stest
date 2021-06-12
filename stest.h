@@ -77,6 +77,23 @@
 #define STEST_FAIL_MORE_INFO  1  //1 - on  0 - off; show more info (file:line)
 
 
+enum stest_return_t
+{
+    STEST_RETURN_0,               //always 0
+    STEST_RETURN_0_1,             //if(cnt failed test == 0) 0 else 1
+    STEST_RETURN_CNT_FAILED,
+    STEST_RETURN_CNT_SKIPPED,
+    STEST_RETURN_CNT_PASSED,
+    STEST_RETURN_CNT_TOTAL,
+};
+
+/*
+ * Select the option you want functions main and run_case(s) to return
+ * if you are using STest on an embedded system.
+ */
+#define STEST_RETURN_TYPE  STEST_RETURN_0
+
+
 
 enum test_status_t
 {
@@ -319,6 +336,23 @@ static void stest_print_totals(unsigned int *status_cnt)
 
 
 
+static inline unsigned int stest_ret_result(unsigned int *status_cnt)
+{
+    switch (STEST_RETURN_TYPE)
+    {
+        case STEST_RETURN_0_1        :  return status_cnt[TEST_STATUS_FAIL] ? 1 : 0;
+        case STEST_RETURN_CNT_FAILED :  return status_cnt[TEST_STATUS_FAIL];
+        case STEST_RETURN_CNT_SKIPPED:  return status_cnt[TEST_STATUS_SKIP];
+        case STEST_RETURN_CNT_PASSED :  return status_cnt[TEST_STATUS_PASS];
+        case STEST_RETURN_CNT_TOTAL  :  return status_cnt[TEST_STATUS_PASS]+
+                                               status_cnt[TEST_STATUS_SKIP]+
+                                               status_cnt[TEST_STATUS_FAIL];
+        default: return 0;
+    }
+}
+
+
+
 static unsigned int run_case(struct test_case_t *test_case)
 {
     struct test_info_t test_info;
@@ -346,7 +380,7 @@ static unsigned int run_case(struct test_case_t *test_case)
     stest_print_totals(test_case->status_cnt);
     stest_print_footer(test_case);
 
-    return test_case->status_cnt[TEST_STATUS_FAIL];
+    return stest_ret_result(test_case->status_cnt);
 }
 
 
@@ -360,11 +394,11 @@ static inline unsigned int run_cases(struct test_case_t *test_cases[], size_t co
 
     for(i = 0; i < count_cases; ++i)
     {
-       total_cnt[TEST_STATUS_FAIL] += run_case(test_cases[i]);
+       run_case(test_cases[i]);
 
        total_cnt[TEST_STATUS_PASS] += test_cases[i]->status_cnt[TEST_STATUS_PASS];
        total_cnt[TEST_STATUS_SKIP] += test_cases[i]->status_cnt[TEST_STATUS_SKIP];
-
+       total_cnt[TEST_STATUS_FAIL] += test_cases[i]->status_cnt[TEST_STATUS_FAIL];
     }
 
     if( count_cases > 1 )
@@ -373,7 +407,7 @@ static inline unsigned int run_cases(struct test_case_t *test_cases[], size_t co
         stest_print_footer(NULL);
     }
 
-    return total_cnt[TEST_STATUS_FAIL];
+    return stest_ret_result(total_cnt);
 }
 
 
