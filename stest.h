@@ -214,34 +214,7 @@ static inline struct test_info_t get_test_info( const char         *file_name,
 #define STEST_COLOR_TEXT_RED    "\033[31m"
 #define STEST_COLOR_TEXT_GREEN  "\033[32m"
 #define STEST_COLOR_TEXT_YELLOW "\033[33m"
-
-
-
-static inline void stest_print_title(const char *first, struct test_case_t *test_case, const char *last)
-{
-    stest_printf("%s", first);
-
-    if(test_case && test_case->case_name)
-        stest_printf(" of %s from: %s:%d", test_case->case_name,
-                                           test_case->file_name,
-                                           test_case->line_num);
-
-    stest_printf("%s", last);
-}
-
-
-
-static inline void stest_print_header(struct test_case_t *test_case)
-{
-    stest_print_title("\n\n---------- Start testing", test_case, " ----------");
-}
-
-
-
-static inline void stest_print_footer(struct test_case_t *test_case)
-{
-    stest_print_title("========== Finished testing", test_case, " ==========\n\n");
-}
+#define STEST_COLOR_TEXT_CYAN   "\033[1;34m"
 
 
 
@@ -251,6 +224,18 @@ static inline void stest_print_msg(const char *msg, const char *color)
         stest_printf("%s%s" STEST_COLOR_TEXT_NORMAL, color, msg);
     else
         stest_printf("%s", msg);
+}
+
+
+
+static inline void stest_print_header(struct test_case_t *test_case)
+{
+    stest_printf("\n\nStart testing of ");
+
+    stest_print_msg(test_case->case_name, STEST_COLOR_TEXT_CYAN);
+    stest_printf(" from: ");
+    stest_print_msg(test_case->file_name, STEST_COLOR_TEXT_CYAN);
+    stest_printf(":%d\n", test_case->line_num);
 }
 
 
@@ -333,7 +318,7 @@ static void stest_print_totals(unsigned int *status_cnt)
     stest_print_counter("passed," , STEST_COLOR_TEXT_GREEN , status_cnt[TEST_STATUS_PASS]);
     stest_print_counter("skipped,", STEST_COLOR_TEXT_YELLOW, status_cnt[TEST_STATUS_SKIP]);
     stest_print_counter("failed," , STEST_COLOR_TEXT_RED   , status_cnt[TEST_STATUS_FAIL]);
-    stest_print_counter("total\n" , NULL                   , status_cnt[TEST_STATUS_PASS]+
+    stest_print_counter("total\n\n",NULL                   , status_cnt[TEST_STATUS_PASS]+
                                                              status_cnt[TEST_STATUS_SKIP]+
                                                              status_cnt[TEST_STATUS_FAIL]);
 }
@@ -382,7 +367,6 @@ static unsigned int run_case(struct test_case_t *test_case)
 
 
     stest_print_totals(test_case->status_cnt);
-    stest_print_footer(test_case);
 
     return stest_ret_result(test_case->status_cnt);
 }
@@ -407,8 +391,8 @@ static inline unsigned int run_cases(struct test_case_t *test_cases[], size_t co
 
     if( count_cases > 1 )
     {
+        stest_printf("\n\n---------- Finished testing ----------");
         stest_print_totals(total_cnt);
-        stest_print_footer(NULL);
     }
 
     return stest_ret_result(total_cnt);
