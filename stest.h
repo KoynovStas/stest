@@ -242,11 +242,14 @@ static inline void stest_print_header(struct test_case_t *test_case)
 
 static void stest_print_info(struct test_info_t *test_info, int more_info, const char *color_msg)
 {
-    stest_printf("  %s", test_info->func_name);
+    stest_printf("  %s  ", test_info->func_name);
 
     if(more_info)
-        stest_printf("  in file: %s:%d", test_info->file_name,
-                                         test_info->line_num);
+    {
+        stest_printf(" in file: ");
+        stest_print_msg(test_info->file_name, STEST_COLOR_TEXT_CYAN);
+        stest_printf(":%d", test_info->line_num);
+    }
 
     if(test_info->msg)
     {
