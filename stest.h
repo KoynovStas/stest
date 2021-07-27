@@ -244,7 +244,7 @@ static inline void stest_print_header(struct test_case_t *test_case)
 
 static void stest_print_info(struct test_info_t *test_info, int more_info, const char *color_msg)
 {
-    stest_printf("  %s  ", test_info->func_name);
+    stest_printf(" %s", test_info->func_name);
 
     if(more_info)
     {

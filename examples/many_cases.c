@@ -17,7 +17,7 @@ TEST(test_pass2)
 
 
 
-TEST(test_for_32bit)
+TEST(test_32bit)
 {
     if(sizeof(void*) == 4)
         TEST_PASS(NULL);
@@ -26,7 +26,8 @@ TEST(test_for_32bit)
 }
 
 
-TEST(test_for_64bit)
+
+TEST(test_64bit)
 {
     if(sizeof(void*) == 8)
         TEST_PASS(NULL);
@@ -36,14 +37,14 @@ TEST(test_for_64bit)
 
 
 
-TEST(test_skip)
+TEST(test_fail1)
 {
-    TEST_SKIP("a message for skip");
+    TEST_FAIL(NULL);
 }
 
 
 
-TEST(test_fail)
+TEST(test_fail2)
 {
     TEST_FAIL("a message for fail");
 }
@@ -55,12 +56,11 @@ stest_func tests[] =
     test_pass,
     test_pass2,
 
-    test_for_32bit,
-    test_for_64bit,
+    test_32bit,
+    test_64bit,
 
-    test_skip,
-
-    test_fail,
+    test_fail1,
+    test_fail2,
 };
 
 
