@@ -76,6 +76,11 @@
 #define STEST_SKIP_MORE_INFO  0  //1 - on  0 - off; show more info (file:line)
 #define STEST_FAIL_MORE_INFO  1  //1 - on  0 - off; show more info (file:line)
 
+#define STEST_PASS_ENABLED    1  //1 - on  0 - off; show(print) status
+#define STEST_SKIP_ENABLED    1  //1 - on  0 - off; show(print) status
+//FAIL test always ENABLED
+
+
 
 enum stest_return_t
 {
@@ -87,10 +92,7 @@ enum stest_return_t
     STEST_RETURN_CNT_TOTAL,
 };
 
-/*
- * Select the option you want functions main and run_case(s) to return
- * if you are using STest on an embedded system.
- */
+//Select the option you want functions main and run_case(s) to return
 #define STEST_RETURN_TYPE  STEST_RETURN_0
 
 
@@ -266,6 +268,7 @@ struct print_status_inf
     const char *prefix_color;
     const char *msg_color;
     int         more_info;
+    int         enabled;
 };
 
 
@@ -278,25 +281,31 @@ static void stest_print_status(struct test_info_t *test_info)
             STEST_COLOR_TEXT_GREEN,
             STEST_PASS_MSG_COLOR ? STEST_COLOR_TEXT_GREEN : NULL,
             STEST_PASS_MORE_INFO,
+            STEST_PASS_ENABLED,
         },
         {
             "\nSKIP: ",
             STEST_COLOR_TEXT_YELLOW,
             STEST_SKIP_MSG_COLOR ? STEST_COLOR_TEXT_YELLOW : NULL,
             STEST_SKIP_MORE_INFO,
+            STEST_SKIP_ENABLED,
         },
         {
             "\nFAIL: ",
             STEST_COLOR_TEXT_RED,
             STEST_FAIL_MSG_COLOR ? STEST_COLOR_TEXT_RED : NULL,
             STEST_FAIL_MORE_INFO,
+            1,  //FAIL test always ENABLED
         },
     };
 
     const struct print_status_inf *inf = &data[test_info->status];
 
-    stest_print_msg(inf->prefix, inf->prefix_color);
-    stest_print_info(test_info, inf->more_info, inf->msg_color);
+    if(inf->enabled)
+    {
+        stest_print_msg(inf->prefix, inf->prefix_color);
+        stest_print_info(test_info, inf->more_info, inf->msg_color);
+    }
 }
 
 
