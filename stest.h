@@ -248,7 +248,7 @@ static void stest_print_info(struct test_info_t *test_info, int more_info, const
 
     if(more_info)
     {
-        stest_printf(" in file: ");
+        stest_printf("  in file: ");
         stest_print_msg(test_info->file_name, STEST_COLOR_TEXT_CYAN);
         stest_printf(":%d", test_info->line_num);
     }
