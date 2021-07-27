@@ -8,7 +8,7 @@ STest is simple unit tests for C/C++.
 
 
 <p align="center">
-<img src="./screenshot.png" width="853"/>
+<img src="./screenshot.png" width="600"/>
 </p>
 
 
