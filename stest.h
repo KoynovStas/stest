@@ -95,6 +95,30 @@ enum stest_return_t
 //Select the option you want functions main and run_case(s) to return
 #define STEST_RETURN_TYPE  STEST_RETURN_0
 
+//uncomment manually or use CFLAGS in build system
+//#define STEST_ONLY_BASENAME   //need only basename of __FILE__
+//#define STEST_UNIX_SLASH      //Unix style slash
+
+
+#ifdef STEST_ONLY_BASENAME
+    #include <string.h>
+
+    static const char* stest_basename(const char *filename)
+    {
+        #ifdef STEST_UNIX_SLASH
+            const char slash = '/';
+        #else
+            const char slash = '\\';
+        #endif
+
+        const char *p = strrchr(filename, slash);
+        return p ? p + 1 : filename;
+    }
+
+#else
+    #define stest_basename(filename) filename
+#endif
+
 
 
 enum test_status_t
@@ -236,7 +260,7 @@ static inline void stest_print_header(struct test_case_t *test_case)
 
     stest_print_msg(test_case->case_name, STEST_COLOR_TEXT_CYAN);
     stest_printf(" from: ");
-    stest_print_msg(test_case->file_name, STEST_COLOR_TEXT_CYAN);
+    stest_print_msg(stest_basename(test_case->file_name), STEST_COLOR_TEXT_CYAN);
     stest_printf(":%d\n", test_case->line_num);
 }
 
@@ -249,7 +273,7 @@ static void stest_print_info(struct test_info_t *test_info, int more_info, const
     if(more_info)
     {
         stest_printf("  in file: ");
-        stest_print_msg(test_info->file_name, STEST_COLOR_TEXT_CYAN);
+        stest_print_msg(stest_basename(test_info->file_name), STEST_COLOR_TEXT_CYAN);
         stest_printf(":%d", test_info->line_num);
     }
 
