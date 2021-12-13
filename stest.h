@@ -186,6 +186,9 @@ struct test_case_t
 
 #define TEST(name) static struct test_info_t name(struct test_case_t *test_case)
 
+#define TEST_INIT(name)  void name(struct test_case_t *test_case)
+#define TEST_CLEAN(name) void name(struct test_case_t *test_case)
+
 
 
 __attribute__((used))
