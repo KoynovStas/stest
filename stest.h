@@ -50,20 +50,32 @@
 
 /*
  * STest uses the stest_printf macro as a function to print,
- * if the macro is not defined, we use the standard clib function from stdio.h.
+ * if the macro is not defined, we use the standard clib function from stdio.h
  * If you are using STest on an embedded system perhaps you have your own
  * function or less resource-intensive one like xprintf (http://elm-chan.org/fsw/strf/xprintf.html)
  * Then uncomment the definition and add your function.
  * The function must have signature like printf and
  * must support printing for formats: %s %d %u
+ *
+ * Define the stest_snprintf macro if you need TEST_PASS/SKIP/FAIL/ASSERT with print format variant
  */
 
-//#define  stest_printf  xprintf
+//#include "xprintf.h"
+//#define  stest_printf   xprintf
+//#define  stest_snprintf(buf, sz, ...)  xsprintf(buf, __VA_ARGS__)
 
 #ifndef stest_printf  //use printf from libc
     #include <stdio.h>
     #define  stest_printf  printf
 #endif
+
+
+//Uncomment if you want use snprintf from libc
+#ifndef stest_snprintf
+//    #include <stdio.h>
+//    #define  stest_snprintf  snprintf
+#endif
+
 
 
 
@@ -212,6 +224,29 @@ static inline struct test_info_t get_test_info( const char         *file_name,
 
 #define TEST_ASSERT2(expr, msg)  if( !(expr) ) TEST_FAIL(msg)
 #define TEST_ASSERT(expr)  TEST_ASSERT2(expr, NULL)
+
+
+#ifdef stest_snprintf  //User wants to use TEST_PASS/SKIP/FAIL/ASSERT with print format variant
+    #define STEST_MSG_BUF_SIZE  256 //Change the value to suit your requirements
+
+    __attribute__((used))
+    static char stest_msg_buf[STEST_MSG_BUF_SIZE];
+
+    #define TEST_PASSF(...) {                                              \
+            stest_snprintf(stest_msg_buf, STEST_MSG_BUF_SIZE, __VA_ARGS__);\
+            TEST_PASS(stest_msg_buf); }
+
+    #define TEST_SKIPF(...) {                                              \
+            stest_snprintf(stest_msg_buf, STEST_MSG_BUF_SIZE, __VA_ARGS__);\
+            TEST_SKIP(stest_msg_buf); }
+
+    #define TEST_FAILF(...) {                                              \
+            stest_snprintf(stest_msg_buf, STEST_MSG_BUF_SIZE, __VA_ARGS__);\
+            TEST_FAIL(stest_msg_buf); }
+
+    #define TEST_ASSERTF(expr, ...)  if( !(expr) ) TEST_FAILF(__VA_ARGS__)
+#endif
+
 
 
 /*
