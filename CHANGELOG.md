@@ -10,6 +10,21 @@ Copyright (C) 2017 Koynov Stas - skojnov@yandex.ru
 
 
 ---
+
+## Ver 2.1 (2021-12-21)
+
+
+### What's New
+
+- New: add `TEST_PASS/SKIP/FAIL/ASSERT` with print format variant
+- New: add macro `TEST_INIT/ClEAN`
+- New: add macro `STEST_ONLY_BASENAME` for print only base name of file
+- New: add macro `STEST_SKIP/PASS_ENABLED`for on/off show(print) status
+- New: add color for print of file name in `more_info` mode
+- New: delete `print_footer`
+
+
+
 ## Ver 2.0 (2021-06-14)
 
 
